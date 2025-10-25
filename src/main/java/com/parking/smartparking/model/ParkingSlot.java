@@ -21,6 +21,9 @@ public class ParkingSlot {
     private String floor;
 
     @Column(nullable = false)
+    private String location;
+
+    @Column(nullable = false)
     private Double pricePerHour;
 
     @Enumerated(EnumType.STRING)
@@ -71,6 +74,14 @@ public class ParkingSlot {
 
     public void setFloor(String floor) {
         this.floor = floor;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public Double getPricePerHour() {

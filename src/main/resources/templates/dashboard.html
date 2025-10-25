@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Parking System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-available {
+            color: #28a745;
+        }
+        .status-occupied {
+            color: #dc3545;
+        }
+        .status-maintenance {
+            color: #ffc107;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-parking"></i> Smart Parking System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/slots">Parking Slots</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/bookings">Bookings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/users">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/book-slot">Book Slot</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signup">Sign Up</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Dashboard</h1>
+        
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-parking fa-2x mb-2"></i>
+                        <h4 th:text="${slots != null ? #lists.size(slots) : 0}">0</h4>
+                        <p class="mb-0">Total Slots</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h4 th:text="${availableCount}">0</h4>
+                        <p class="mb-0">Available</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-times-circle fa-2x mb-2"></i>
+                        <h4 th:text="${occupiedCount}">0</h4>
+                        <p class="mb-0">Occupied</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar fa-2x mb-2"></i>
+                        <h4 th:text="${bookings != null ? #lists.size(bookings) : 0}">0</h4>
+                        <p class="mb-0">Total Bookings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parking Slots Overview -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Parking Slots Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" th:if="${slots != null and !slots.empty}">
+                            <div class="col-md-6 col-lg-4 mb-3" th:each="slot : ${slots}">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-parking"></i> Slot <span th:text="${slot.slotNumber}"></span>
+                                        </h6>
+                                        <p class="card-text small">
+                                            <strong>Type:</strong> <span th:text="${slot.slotType}"></span><br>
+                                            <strong>Location:</strong> <span th:text="${slot.location}"></span><br>
+                                            <strong>Price:</strong> $<span th:text="${slot.pricePerHour}"></span>/hour
+                                        </p>
+                                        <span class="badge" 
+                                              th:classappend="${slot.status.name() == 'AVAILABLE'} ? 'bg-success' : 
+                                                           (${slot.status.name() == 'OCCUPIED'} ? 'bg-danger' : 'bg-warning')"
+                                              th:text="${slot.status}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center" th:if="${slots == null or slots.empty}">
+                            <p class="text-muted">No parking slots found.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Bookings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${bookings != null and !bookings.empty}">
+                            <div class="mb-3" th:each="booking, iterStat : ${bookings}" th:if="${iterStat.index < 5}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Booking #<span th:text="${booking.id}"></span></strong><br>
+                                        <small class="text-muted">
+                                            <span th:text="${booking.startTime}"></span> - 
+                                            <span th:text="${booking.endTime}"></span>
+                                        </small>
+                                    </div>
+                                    <span class="badge" 
+                                          th:classappend="${booking.status.name() == 'CONFIRMED'} ? 'bg-success' : 
+                                                       (${booking.status.name() == 'CANCELLED'} ? 'bg-danger' : 'bg-warning')"
+                                          th:text="${booking.status}"></span>
+                                </div>
+                                <hr th:if="${!iterStat.last}">
+                            </div>
+                        </div>
+                        <div class="text-center" th:if="${bookings == null or bookings.empty}">
+                            <p class="text-muted">No recent bookings.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light text-center text-muted py-3 mt-5">
+        <div class="container">
+            <p>&copy; 2024 Smart Parking System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
